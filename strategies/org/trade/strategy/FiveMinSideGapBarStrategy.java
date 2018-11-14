@@ -177,9 +177,13 @@ public class FiveMinSideGapBarStrategy extends AbstractStrategyRule {
 			if (null == getTradestrategy().getSide()) {
 				error(1, 101, "Error  tradestrategy side has not been set.");
 			}
-			if (!this.isThereOpenPosition()) {
+			
+			Boolean isAfterFirstBar = !currentCandleItem.getLastUpdateDate()
+					.isBefore(this.getTradestrategy().getTradingday().getOpen().plusMinutes(6));
+			// if (!this.isThereOpenPosition() && openCandle != null && prevCandleItem != null) {
+			if (!this.isThereOpenPosition() && isAfterFirstBar) {
 				if (Side.BOT.equals(getTradestrategy().getSide())) {
-					if (openCandle.getLow() > prevCandleItem.getLow()) {
+					if (openCandle.getLow() > currentCandleItem.getLow()) {
 						_log.info("Rule 5min low broken. Symbol: " + getSymbol() + " Time: " + startPeriod);
 						this.cancelAllOrders();
 						updateTradestrategyStatus(TradestrategyStatus.FIVE_MIN_LOW_BROKEN);
@@ -188,7 +192,7 @@ public class FiveMinSideGapBarStrategy extends AbstractStrategyRule {
 
 					}
 				} else {
-					if (openCandle.getHigh() < prevCandleItem.getHigh()) {
+					if (openCandle.getHigh() < currentCandleItem.getHigh()) {
 						_log.info("Rule 5min high broken. Symbol: " + getSymbol() + " Time: " + startPeriod);
 						this.cancelAllOrders();
 						updateTradestrategyStatus(TradestrategyStatus.FIVE_MIN_HIGH_BROKEN);
